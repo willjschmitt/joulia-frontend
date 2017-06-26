@@ -1,0 +1,3 @@
+# Add this to crontab to auto renew the ssl certs with let's encrypt.
+# $ sudo crontab -e
+0 0 * * * certbot --renew
