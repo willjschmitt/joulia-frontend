@@ -1,0 +1,50 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: joulia-frontend
+  labels:
+    app: joulia-frontend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: joulia-frontend
+  template:
+    metadata:
+      labels:
+        app: joulia-frontend
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:latest
+        ports:
+#        - containerPort: 443
+        - containerPort: 80
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 80
+          initialDelaySeconds: 30
+          timeoutSeconds: 1
+        volumeMounts:
+        - mountPath: /etc/nginx/conf.d
+          name: joulia-frontend-configmap
+        - mountPath: /etc/letsencrypt
+          name: letsencrypt-nginx-configmap
+        - mountPath: /etc/letsencrypt/live/joulia.io
+          name: joulia-io-ssl-certs
+        - mountPath: /etc/letsencrypt/live/brew.joulia.io
+          name: brew-joulia-io-ssl-certs
+      volumes:
+      - name: joulia-frontend-configmap
+        configMap:
+          name: joulia-frontend-configmap
+      - name: letsencrypt-nginx-configmap
+        configMap:
+          name: letsencrypt-nginx-configmap
+      - name: joulia-io-ssl-certs
+        secret:
+          secretName: joulia.io-ssl-certs
+      - name: brew-joulia-io-ssl-certs
+        secret:
+          secretName: brew.joulia.io-ssl-certs
