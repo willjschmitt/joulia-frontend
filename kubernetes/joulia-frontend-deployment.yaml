@@ -62,8 +62,6 @@ spec:
   - secretName: joulia-tls
     hosts:
     - joulia.io
-  - secretName: brew-joulia-tls
-    hosts:
     - brew.joulia.io
   rules:
   - host: joulia.io
