@@ -1,0 +1,82 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: joulia-frontend
+  labels:
+    app: joulia-frontend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: joulia-frontend
+  template:
+    metadata:
+      labels:
+        app: joulia-frontend
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:latest
+        ports:
+        - containerPort: 80
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 80
+          initialDelaySeconds: 30
+          timeoutSeconds: 1
+        volumeMounts:
+        - mountPath: /etc/nginx/conf.d
+          name: joulia-frontend-configmap
+      volumes:
+      - name: joulia-frontend-configmap
+        configMap:
+          name: joulia-frontend-configmap
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: joulia-frontend
+  labels:
+    app: joulia-frontend
+spec:
+  type: NodePort
+  ports:
+  - port: 80
+    protocol: TCP
+    name: http
+  selector:
+    app: joulia-frontend
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: joulia-frontend-ingress
+  annotations:
+    kubernetes.io/ingress.class: "gce"
+    kubernetes.io/ingress.global-static-ip-name: "joulia-frontend-ingress"
+    # Makes kube-lego monitor for refreshing LetsEncrypt certs.
+    kubernetes.io/tls-acme: "true"
+spec:
+  tls:
+  - secretName: joulia-tls
+    hosts:
+    - joulia.io
+  - secretName: brew-joulia-tls
+    hosts:
+    - brew.joulia.io
+  rules:
+  - host: joulia.io
+    http:
+      paths:
+      - path: /*
+        backend:
+          serviceName: joulia-frontend
+          servicePort: 80
+  - host: brew.joulia.io
+    http:
+      paths:
+      - path: /*
+        backend:
+          serviceName: joulia-frontend
+          servicePort: 80

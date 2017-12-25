@@ -17,5 +17,26 @@ in `/etc/nginx/sites-enabled/`.
 Add the contents of `crontab` to the root user crontab with `sudo crontab -e`,
 which will auto-renew the SSL certificates daily.
 
+## Kubernetes Quickstart
+Build the configuration file into a single conf file by running:
+```
+$ python build_nginx_config.py joulia-frontend.conf default.conf
+```
+
+Create a configmap to store the Nginx config:
+```
+kubectl apply configmap joulia-frontend-configmap --from-file=out/default.conf
+```
+
+Create the kubernetes deployment and service to serve from:
+```
+kubectl apply -f kubernetes/joulia-frontend-deployment.yaml
+```
+
+Create the kube-lego deployment to manage the TLS/SSL certs with lets-encrypt.
+```
+kubectl apply -f kubernetes/kube-lego.yaml
+```
+
 ## Licensing
 Copyright 2017 William Schmitt. All Rights Reserved.
