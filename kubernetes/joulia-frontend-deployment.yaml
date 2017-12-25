@@ -51,7 +51,7 @@ spec:
 apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
-  name: joulia-webserver-ingress
+  name: joulia-frontend-ingress
   annotations:
     kubernetes.io/ingress.class: "gce"
     kubernetes.io/ingress.global-static-ip-name: "joulia-frontend-ingress"
@@ -67,14 +67,14 @@ spec:
   - host: joulia.io
     http:
       paths:
-      - path: /
+      - path: /.*
         backend:
           serviceName: joulia-frontend
           servicePort: 80
   - host: brew.joulia.io
     http:
       paths:
-      - path: /
+      - path: /.*
         backend:
           serviceName: joulia-frontend
           servicePort: 80
