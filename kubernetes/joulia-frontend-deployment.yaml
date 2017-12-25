@@ -18,7 +18,6 @@ spec:
       - name: nginx
         image: nginx:latest
         ports:
-#        - containerPort: 443
         - containerPort: 80
         livenessProbe:
           httpGet:
@@ -29,22 +28,53 @@ spec:
         volumeMounts:
         - mountPath: /etc/nginx/conf.d
           name: joulia-frontend-configmap
-        - mountPath: /etc/letsencrypt
-          name: letsencrypt-nginx-configmap
-        - mountPath: /etc/letsencrypt/live/joulia.io
-          name: joulia-io-ssl-certs
-        - mountPath: /etc/letsencrypt/live/brew.joulia.io
-          name: brew-joulia-io-ssl-certs
       volumes:
       - name: joulia-frontend-configmap
         configMap:
           name: joulia-frontend-configmap
-      - name: letsencrypt-nginx-configmap
-        configMap:
-          name: letsencrypt-nginx-configmap
-      - name: joulia-io-ssl-certs
-        secret:
-          secretName: joulia.io-ssl-certs
-      - name: brew-joulia-io-ssl-certs
-        secret:
-          secretName: brew.joulia.io-ssl-certs
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: joulia-frontend
+  labels:
+    app: joulia-frontend
+spec:
+  type: NodePort
+  ports:
+  - port: 80
+    protocol: TCP
+    name: http
+  selector:
+    app: joulia-frontend
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: joulia-webserver-ingress
+  annotations:
+    kubernetes.io/ingress.class: "gce"
+    kubernetes.io/ingress.global-static-ip-name: "joulia-frontend-ingress"
+spec:
+  tls:
+  - hosts:
+    - joulia.io
+    secretName: joulia-server-secret
+  - hosts:
+    - brew.joulia.io
+    secretName: brew-joulia-server-secret
+  rules:
+  - host: joulia.io
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: joulia-frontend
+          servicePort: 80
+  - host: brew.joulia.io
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: joulia-frontend
+          servicePort: 80
