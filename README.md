@@ -25,13 +25,17 @@ $ python build_nginx_config.py joulia-frontend.conf default.conf
 
 Create a configmap to store the Nginx config:
 ```
-kubectl create configmap joulia-frontend-configmap --from-file=out/default.conf
+kubectl apply configmap joulia-frontend-configmap --from-file=out/default.conf
 ```
 
 Create the kubernetes deployment and service to serve from:
 ```
-kubectl create -f kubernetes/joulia-frontend-deployment.yaml
-kubectl create -f kubernetes/joulia-frontend-service.yaml
+kubectl apply -f kubernetes/joulia-frontend-deployment.yaml
+```
+
+Create the kube-lego deployment to manage the TLS/SSL certs with lets-encrypt.
+```
+kubectl apply -f kubernetes/kube-lego.yaml
 ```
 
 ## Licensing

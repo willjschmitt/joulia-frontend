@@ -55,26 +55,28 @@ metadata:
   annotations:
     kubernetes.io/ingress.class: "gce"
     kubernetes.io/ingress.global-static-ip-name: "joulia-frontend-ingress"
+    # Makes kube-lego monitor for refreshing LetsEncrypt certs.
+    kubernetes.io/tls-acme: "true"
 spec:
   tls:
-  - hosts:
+  - secretName: joulia-tls
+    hosts:
     - joulia.io
-    secretName: joulia-server-secret
-  - hosts:
+  - secretName: brew-joulia-tls
+    hosts:
     - brew.joulia.io
-    secretName: brew-joulia-server-secret
   rules:
   - host: joulia.io
     http:
       paths:
-      - path: /.*
+      - path: /*
         backend:
           serviceName: joulia-frontend
           servicePort: 80
   - host: brew.joulia.io
     http:
       paths:
-      - path: /.*
+      - path: /*
         backend:
           serviceName: joulia-frontend
           servicePort: 80
